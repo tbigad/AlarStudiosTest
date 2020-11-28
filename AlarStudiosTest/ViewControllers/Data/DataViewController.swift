@@ -10,6 +10,7 @@ import UIKit
 class DataViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     let code:String
+    var isLoading:Bool = false
     var places:Places = [] {
         didSet {
             DispatchQueue.main.async {
@@ -22,12 +23,23 @@ class DataViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UINib(nibName: DataTableViewCell.identifier, bundle: nil), forCellReuseIdentifier: DataTableViewCell.identifier)
+        getNewData()
     }
 
     init(code:String) {
         self.code = code
         super.init(nibName: nil, bundle: nil)
-        Backend.data(code: code, page: 1, complition: {[weak self] result in
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func getNewData() {
+        isLoading = true
+        let page = (places.count / 10) + 1
+        Backend.data(code: code, page: page, complition: {[weak self] result in
+            self?.isLoading = false
             switch result {
             case .success(let places):
                 self?.places.append(contentsOf: places)
@@ -36,10 +48,6 @@ class DataViewController: UIViewController {
             }
         })
     }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
 }
 
 extension DataViewController : UITableViewDelegate {
@@ -47,6 +55,13 @@ extension DataViewController : UITableViewDelegate {
         let item = places[indexPath.item]
         showDetails(item: item)
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if !(indexPath.item + 1 < self.places.count) {
+            self.isLoading = true;
+            self.getNewData()
+        }
     }
 }
 
