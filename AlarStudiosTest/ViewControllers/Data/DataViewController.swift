@@ -75,6 +75,7 @@ extension DataViewController : UITableViewDataSource {
         let place = places[indexPath.item]
         cell.dataDescription.text = place.country
         cell.dataName.text = place.name
+        cell.dataImage.load(url: place.imageUrl!, placeholder: UIImage(named: "placeholder"))
         return cell
     }
 }

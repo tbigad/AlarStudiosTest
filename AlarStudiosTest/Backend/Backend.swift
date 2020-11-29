@@ -25,6 +25,12 @@ struct DataItem: Codable {
     let id, name: String
     let country: String
     let lat, lon: Double
+    var imageUrl:URL? {
+        let number = Int.random(in: 0..<10)
+        var components = URLComponents(string: "https://picsum.photos/100/100")
+        components?.queryItems = [URLQueryItem(name: "random", value: String(number))]
+        return components?.url
+    }
 }
 
 typealias Places = [DataItem]
